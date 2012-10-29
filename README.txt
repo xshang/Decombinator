@@ -29,9 +29,9 @@ Levenshtein
 
 Once these modules have been successfully installed, Decombinator can be run
 using Python from the command prompt (assuming Python has already been added
-to your PATH) via:-
+to your PATH, and that the downloaded folder Decombinator is located on your desktop) via:-
 
-cd C:\Users\Niclas\Desktop\DeCombinatoR-v1.1
+cd C:\Users\Niclas\Desktop\Decombinator
 python
 import Decombinator
 sequencereads = ["mysequences.fastq"]
