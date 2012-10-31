@@ -460,7 +460,8 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 used_j = jb_regions[j]
 
             seq = str(used_v + ins + used_j)
-            aaseq = SeqIO.Seq(seq, generic_dna).translate()
+            start = len(seq)%3
+            aaseq = SeqIO.Seq(seq[start:], generic_dna).translate()
 
             if fullaaseq == True:
                 if with_outframe == True:
@@ -468,7 +469,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 elif '*' not in aaseq:
                     print >> write_to, str(aaseq)
             else:     
-                if re.findall('FG.G',str(aaseq)):
+                if re.findall('FG.G',str(aaseq)) and re.findall('C',str(aaseq)):
                     indices = [i for i, x in enumerate(aaseq) if x == 'C']
                     upper = str(aaseq).find(re.findall('FG.G',str(aaseq))[0])
                     for i in indices:
@@ -505,7 +506,8 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 used_j = ja_regions[j]
 
             seq = str(used_v + ins + used_j)
-            aaseq = SeqIO.Seq(seq, generic_dna).translate()
+            start = (len(seq)-1)%3
+            aaseq = SeqIO.Seq(seq[start:], generic_dna).translate()
 
             if fullaaseq == True:
                 if with_outframe == True:
