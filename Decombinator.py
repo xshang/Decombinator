@@ -454,7 +454,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 used_v = vb_regions[v]
 
             if delj != 0:
-                used_j = jb_regions[j][:-delj]
+                used_j = jb_regions[j][delj:]
             elif delj == 0:
                 used_j = jb_regions[j]
 
@@ -499,7 +499,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 used_v = va_regions[v]
 
             if delj != 0:
-                used_j = ja_regions[j][:-delj]
+                used_j = ja_regions[j][delj:]
             elif delj == 0:
                 used_j = ja_regions[j]
 
