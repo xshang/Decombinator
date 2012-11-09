@@ -515,7 +515,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 elif '*' not in aaseq:
                     print >> write_to, str(aaseq)
             else:     
-                if re.findall('FG.G',str(aaseq)):
+                if re.findall('FG.G',str(aaseq))and re.findall('C',str(aaseq)):
                     indices = [i for i, x in enumerate(aaseq) if x == 'C']
                     upper = str(aaseq).find(re.findall('FG.G',str(aaseq))[0])
                     for i in indices:
