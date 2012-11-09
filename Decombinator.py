@@ -10,7 +10,6 @@ def analysis( Sequence_Reads, with_statistics=True, with_reverse_complement_sear
     from string import Template
     from operator import itemgetter, attrgetter
     import Levenshtein as lev
-    import plotting as p
 
     v_half_split, j_half_split = [10,6] # Do not change - V tags are split at position 10, J at position 6, to look for half tags if no full tag is found.
 
@@ -455,13 +454,12 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 used_v = vb_regions[v]
 
             if delj != 0:
-                used_j = jb_regions[j][delj:]
+                used_j = jb_regions[j][:-delj]
             elif delj == 0:
                 used_j = jb_regions[j]
 
             seq = str(used_v + ins + used_j)
-            start = len(seq)%3
-            aaseq = SeqIO.Seq(seq[start:], generic_dna).translate()
+            aaseq = SeqIO.Seq(seq, generic_dna).translate()
 
             if fullaaseq == True:
                 if with_outframe == True:
@@ -469,7 +467,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 elif '*' not in aaseq:
                     print >> write_to, str(aaseq)
             else:     
-                if re.findall('FG.G',str(aaseq)) and re.findall('C',str(aaseq)):
+                if re.findall('FG.G',str(aaseq)):
                     indices = [i for i, x in enumerate(aaseq) if x == 'C']
                     upper = str(aaseq).find(re.findall('FG.G',str(aaseq))[0])
                     for i in indices:
@@ -501,13 +499,12 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                 used_v = va_regions[v]
 
             if delj != 0:
-                used_j = ja_regions[j][delj:]
+                used_j = ja_regions[j][:-delj]
             elif delj == 0:
                 used_j = ja_regions[j]
 
             seq = str(used_v + ins + used_j)
-            start = (len(seq)-1)%3
-            aaseq = SeqIO.Seq(seq[start:], generic_dna).translate()
+            aaseq = SeqIO.Seq(seq, generic_dna).translate()
 
             if fullaaseq == True:
                 if with_outframe == True:
