@@ -24,8 +24,19 @@ Decombinator requires the following Python modules:-
 NumPy
 Biopython
 matplotlib
-Acora
+acora
 Levenshtein
+
+NumPy, BioPython and matplotlib install in a very straightforward manner - just follow the instructions,
+accepting all defaults. To install acora, you will need GCC or something akin to it for your platform.
+For Linux users, installation of GCC should be straightforward. For Windows users, something like MinGW
+is needed - I recommend installing the GCC Win32 binaries from this website http://www.develer.com/oss/GccWinBinaries,
+which is very straightforward to install - again, follow the instructions provided there. Installation on
+a Mac should be possible with Xcode, though I haven't tested this yet. Installation of the Levenshtein
+package will probably require Python setuptools to be downloaded and installed.
+
+For anyone requiring further guidance for installation of any of the above packages, please see
+www.ucl.ac.uk/innate2adaptive/software for a comprehensive set of instructions on installation and usage.
 
 Once these modules have been successfully installed, Decombinator can be run
 using Python from the command prompt (assuming Python has already been added
@@ -42,10 +53,10 @@ Further functionality is obtained by then using:-
 
 Decombinator.plot_v_usage(handle=open("DecombinatorResults.txt","rU"),savefilename="Vusage"),order="frequency")
 Decombinator.plot_j_usage(handle=open("DecombinatorResults.txt","rU"),savefilename="Jusage"),order="frequency")
-Decombinator.plot_del_v(handle=open("DecombinatorResults.txt","rU"),savefilename="Vdels"))
-Decombinator.plot_del_j(handle=open("DecombinatorResults.txt","rU"),savefilename="Jdels"))
-Decombinator.plot_vj_joint_dist(handle=open("DecombinatorResults.txt","rU"),savefilename="VJusage"))
-Decombinator.plot_insert_lengths(handle=open("DecombinatorResults.txt","rU"),savefilename="InsertLengths"))
+Decombinator.plot_del_v(handle=open("DecombinatorResults.txt","rU"),savefilename="Vdels")
+Decombinator.plot_del_j(handle=open("DecombinatorResults.txt","rU"),savefilename="Jdels")
+Decombinator.plot_vj_joint_dist(handle=open("DecombinatorResults.txt","rU"),savefilename="VJusage")
+Decombinator.plot_insert_lengths(handle=open("DecombinatorResults.txt","rU"),savefilename="InsertLengths")
 
 *plot_v_usage and plot_j_usage have additional option:-
 order="chromosome" # Plots V or J usage according to chromosome position
