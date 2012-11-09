@@ -402,6 +402,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
     ## with_outframe=True or False: writes all aa seqeunces to file, including those that are out-of-frame (with stop codon symbol *)
     ## fullaaseq=True or False: True writes the whole V(D)J aa sequence to file, False, writes only the CDR3 region.
 
+    from Bio.Seq import Seq
     from Bio import SeqIO
     from Bio.Alphabet import generic_dna
     import string
@@ -460,7 +461,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
 
             seq = str(used_v + ins + used_j)
             start = len(seq)%3
-            aaseq = SeqIO.Seq(seq[start:], generic_dna).translate()
+            aaseq = Seq(str(seq[start:]), generic_dna).translate()
 
             if fullaaseq == True:
                 if with_outframe == True:
@@ -506,7 +507,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
 
             seq = str(used_v + ins + used_j)
             start = (len(seq)-1)%3
-            aaseq = SeqIO.Seq(seq[start:], generic_dna).translate()
+            aaseq = Seq(str(seq[start:]), generic_dna).translate()
 
             if fullaaseq == True:
                 if with_outframe == True:
