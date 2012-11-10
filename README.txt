@@ -40,9 +40,9 @@ www.ucl.ac.uk/innate2adaptive/software for a comprehensive set of instructions o
 
 Once these modules have been successfully installed, Decombinator can be run
 using Python from the command prompt (assuming Python has already been added
-to your PATH, and that the downloaded folder Decombinator is located on your desktop) via:-
+to your PATH, and that the downloaded folder Decombinator is located on your desktop) via, for example:-
 
-cd C:\Users\Niclas\Desktop\Decombinator
+cd C:\Users\...\Desktop\Decombinator
 python
 import Decombinator
 sequencereads = ["mysequences.fastq"]
@@ -51,12 +51,12 @@ Decombinator.analysis( sequencereads )
 #############
 Further functionality is obtained by then using:-
 
-Decombinator.plot_v_usage(handle=open("DecombinatorResults.txt","rU"),savefilename="Vusage"),order="frequency")
-Decombinator.plot_j_usage(handle=open("DecombinatorResults.txt","rU"),savefilename="Jusage"),order="frequency")
-Decombinator.plot_del_v(handle=open("DecombinatorResults.txt","rU"),savefilename="Vdels")
-Decombinator.plot_del_j(handle=open("DecombinatorResults.txt","rU"),savefilename="Jdels")
-Decombinator.plot_vj_joint_dist(handle=open("DecombinatorResults.txt","rU"),savefilename="VJusage")
-Decombinator.plot_insert_lengths(handle=open("DecombinatorResults.txt","rU"),savefilename="InsertLengths")
+Decombinator.plot_v_usage(handle=open("DecombinatorResults.txt","rU"),order="frequency")
+Decombinator.plot_j_usage(handle=open("DecombinatorResults.txt","rU"),order="frequency")
+Decombinator.plot_del_v(handle=open("DecombinatorResults.txt","rU"))
+Decombinator.plot_del_j(handle=open("DecombinatorResults.txt","rU"))
+Decombinator.plot_vj_joint_dist(handle=open("DecombinatorResults.txt","rU"))
+Decombinator.plot_insert_lengths(handle=open("DecombinatorResults.txt","rU"))
 
 *plot_v_usage and plot_j_usage have additional option:-
 order="chromosome" # Plots V or J usage according to chromosome position

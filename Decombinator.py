@@ -360,7 +360,7 @@ def get_j_tags(file_j, half_split):
 
     return [j_seqs, half1_j_seqs, half2_j_seqs, jump_to_start_j]
 
-def get_distinct_clones( handle_results, with_count=False ):
+def get_distinct_clones( handle, with_count=False ):
 
     ## LOOKS THROUGH TEXT FILE OF CLASSIFIERS AND WRITES NEW FILE CONTAINING ALL DISTINCT CLASSIFIERS, OPTIONALLY WITH COUNT OF ALL DISTINCT CLASSIFIERS
     ## with_count=True writes file with counts of all distinct classifiers
@@ -374,7 +374,7 @@ def get_distinct_clones( handle_results, with_count=False ):
     if with_count == True:
         stemplate = Template('$count $element')
         d = coll.defaultdict(int)
-        for line in handle_results:
+        for line in handle:
             elements = line.rstrip("\n")
             d[elements] += 1
         d_sorted = sorted(d.items(), key=itemgetter(1), reverse=True)
@@ -384,17 +384,17 @@ def get_distinct_clones( handle_results, with_count=False ):
     else:
         stemplate = Template('$element')
         d = coll.defaultdict(int)
-        for line in handle_results:
+        for line in handle:
             elements = line.rstrip("\n")
             if elements not in d:
                 d[elements] = 1
                 f_seq = stemplate.substitute(element = elements)
                 print >> write_to, f_seq
     
-    handle_results.close()
+    handle.close()
     write_to.close()
 
-def get_translated_sequences( handle_results, chain="beta", with_outframe=False, fullaaseq=False, handle_vb=open("human_TRBV_region.fasta","rU"), handle_jb=open("human_TRBJ_region.fasta","rU"), handle_va=open("human_TRAV_region.fasta","rU"), handle_ja=open("human_TRAJ_region.fasta","rU") ):
+def get_translated_sequences( handle, chain="beta", with_outframe=False, fullaaseq=False ):
 
     ## TRANSLATES CLASSIFIERS TO AA SEQUENCES VIA THEIR NT SEQUENCE
     ## Default settings are -
@@ -407,6 +407,11 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
     from Bio.Alphabet import generic_dna
     import string
     import re
+
+    handle_vb=open("human_TRBV_region.fasta","rU")
+    handle_jb=open("human_TRBJ_region.fasta","rU")
+    handle_va=open("human_TRAV_region.fasta","rU")
+    handle_ja=open("human_TRAJ_region.fasta","rU")
     
     vb_raw = list(SeqIO.parse(handle_vb, "fasta"))
     handle_vb.close()
@@ -436,7 +441,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
     write_to = open("translated_sequences.txt", "w")
 
     if chain == "beta":
-        for line in handle_results:
+        for line in handle:
             elements = line.rstrip("\n")
             classifier = string.split(elements)
 
@@ -482,7 +487,7 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                         print >> write_to, cdr3
 
     if chain == "alpha":
-        for line in handle_results:
+        for line in handle:
             elements = line.rstrip("\n")
             classifier = string.split(elements)
 
@@ -524,13 +529,13 @@ def get_translated_sequences( handle_results, chain="beta", with_outframe=False,
                     cdr3 = aaseq[indices[lower]:upper+4]
                     if with_outframe == True:
                         print >> write_to, cdr3
-                    elif '*' not in cdr3:
+                    elif '*' not in aaseq:
                         print >> write_to, cdr3
             
-    handle_results.close()
+    handle.close()
     write_to.close()
 
-def plot_v_usage( handle, savefilename="Vusage", tags=open("tags_trbv.txt", "rU"), order="frequency"):
+def plot_v_usage( handle, savefilename="Vusage", order="frequency"):
 
     ## PLOTS V GENE USAGE BASED ON A FILE OF CLASSIFIERS
     
@@ -540,6 +545,7 @@ def plot_v_usage( handle, savefilename="Vusage", tags=open("tags_trbv.txt", "rU"
     import decimal as dec
     from operator import itemgetter, attrgetter
 
+    tags = open("tags_trbv.txt", "rU")
     num_genes = 0
     for line in tags:
         num_genes += 1
@@ -599,8 +605,11 @@ def plot_v_usage( handle, savefilename="Vusage", tags=open("tags_trbv.txt", "rU"
         plt.grid(True)
 
         plt.savefig(str(savefilename)+'.png', dpi=300)
+        
+    handle.close()
+    tags.close()
 
-def plot_j_usage( handle, savefilename="Jusage", tags = open("tags_trbj.txt", "rU"), order="frequency"):
+def plot_j_usage( handle, savefilename="Jusage", order="frequency"):
 
     ## PLOTS J GENE USAGE BASED ON A FILE OF CLASSIFIERS
     
@@ -610,6 +619,7 @@ def plot_j_usage( handle, savefilename="Jusage", tags = open("tags_trbj.txt", "r
     import decimal as dec
     from operator import itemgetter, attrgetter
 
+    tags = open("tags_trbj.txt", "rU")
     num_genes = 0
     for line in tags:
         num_genes += 1
@@ -667,6 +677,9 @@ def plot_j_usage( handle, savefilename="Jusage", tags = open("tags_trbj.txt", "r
 
         plt.savefig(str(savefilename)+'.png', dpi=300)
 
+    handle.close()
+    tags.close()
+
 def plot_del_v( handle, savefilename="Vdels"):
 
     ## PLOTS V GERMLINE DELETIONS BASED ON A FILE OF CLASSIFIERS
@@ -702,6 +715,7 @@ def plot_del_v( handle, savefilename="Vdels"):
 
     plt.savefig(str(savefilename)+'.png', dpi=300)
 
+    handle.close()
 
 def plot_del_j( handle, savefilename="Jdels"):
 
@@ -737,6 +751,8 @@ def plot_del_j( handle, savefilename="Jdels"):
     plt.xlim((0,20))
 
     plt.savefig(str(savefilename)+'.png', dpi=300)
+
+    handle.close()
 
 def plot_vj_joint_dist( handle, savefilename="VJusage", tags_v = open("tags_trbv.txt", "rU"), tags_j = open("tags_trbj.txt", "rU")):
 
@@ -785,6 +801,10 @@ def plot_vj_joint_dist( handle, savefilename="VJusage", tags_v = open("tags_trbv
     plt.setp(xticklabels, fontsize='8')
     plt.savefig(str(savefilename)+'.png', dpi=300)
 
+    handle.close()
+    tags_v.close()
+    tags_j.close()
+
 def plot_insert_lengths( handle, savefilename="InsertLengths" ):
 
     ## PLOTS DISTRIBUTION OF INSERT LENGTH BASED ON A FILE OF CLASSIFIERS
@@ -826,3 +846,5 @@ def plot_insert_lengths( handle, savefilename="InsertLengths" ):
     plt.xlim((0,50))
 
     plt.savefig(str(savefilename)+'.png', dpi=300)
+
+    handle.close()
