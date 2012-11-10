@@ -483,7 +483,7 @@ def get_translated_sequences( handle, chain="beta", with_outframe=False, fullaas
                     cdr3 = aaseq[lower:upper+4]
                     if with_outframe == True:
                         print >> write_to, cdr3
-                    elif '*' not in cdr3:
+                    elif '*' not in aaseq:
                         print >> write_to, cdr3
 
     if chain == "alpha":
