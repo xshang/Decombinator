@@ -30,9 +30,11 @@ acora
 Levenshtein
 
 ##Usage
-decombinator-analyze [OPTIONS] fastq
-decombinator-distinct-clones
-decombinator-translated-sequences
+``decombinator-analyze [OPTIONS] fastq``
+
+``decombinator-distinct-clones``
+
+``decombinator-translated-sequences``
 
 This stuff needs to be changed...
     Decombinator.plot_v_usage(handle=open("DecombinatorResults.txt","rU"),order="frequency")
