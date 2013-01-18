@@ -29,75 +29,63 @@ import decimal as dec
 import Levenshtein as lev
 from Bio import SeqIO
 from time import time
-from toolshed import nopen
+from toolshed import nopen, reader
 from string import Template
 from acora import AcoraBuilder
 
-def analysis(fastqs, v_fasta, j_fasta, 
-                with_reverse_complement_search=True, verbose=True):
+def analysis(fastqs, vfasta, jfasta, vtags, jtags, rev_comp=False,
+                verbose=False):
     if verbose:
         sys.stderr.write('>> Analyzing %d file(s)\n' % len(fastqs))
         sys.stderr.write(">> Importing known V, and J gene segments and tags\n")
 
     # get the sequences per region
-    v_genes = list(SeqIO.parse(nopen(v_fasta), "fasta"))
-    j_genes = list(SeqIO.parse(nopen(j_fasta), "fasta"))
-    v_regions = [v_genes[i].seq.upper() for i, v in enumerate(v_genes)]
-    j_regions = [j_genes[i].seq.upper() for i, v in enumerate(j_genes)]
+    v_genes = list(SeqIO.parse(nopen(vfasta), "fasta"))
+    j_genes = list(SeqIO.parse(nopen(jfasta), "fasta"))
+    # XXX
+    # classes to parse fasta, fastq, and method to reverse complement
+    # get rid of biopython
+    v_regions = [str(v_genes[i].seq.upper()) for i, v in enumerate(v_genes)]
+    j_regions = [str(j_genes[i].seq.upper()) for i, v in enumerate(j_genes)]
 
     ## Build keyword tries of V and J tags for fast assignment
-    v_seqs, half1_v_seqs, half2_v_seqs, jump_to_end_v = get_v_tags(open("tags_trbv.txt", "rU"), 10)
-    j_seqs, half1_j_seqs, half2_j_seqs, jump_to_start_j = get_j_tags(open("tags_trbj.txt", "rU"), 6)   
+    v_seqs, half1_v_seqs, half2_v_seqs, jump_to_end_v = get_tags(vtags)
+    j_seqs, half1_j_seqs, half2_j_seqs, jump_to_start_j = get_tags(jtags)
 
-    v_builder = AcoraBuilder()
-    # Add all V tags to keyword trie
-    [v_builder.add(v_seqs[i]) for i, v in enumerate(v_seqs)]
+    v_builder = AcoraBuilder(v_seqs)
     v_key = v_builder.build()
     
-    j_builder = AcoraBuilder()
-    # Add all J tags to keyword trie
-    [j_builder.add(j_seqs[i]) for i, v in enumerate(j_seqs)]
+    j_builder = AcoraBuilder(j_seqs)
     j_key = j_builder.build()
-
-    # Build keyword tries for first and second halves of both V and J tags
-    v_half1_builder = AcoraBuilder()
-    for i in range(0,len(half1_v_seqs)):
-        v_half1_builder.add(str(half1_v_seqs[i]))
+    
+    v_half1_builder = AcoraBuilder(half1_v_seqs)
     half1_v_key = v_half1_builder.build()
-
-    v_half2_builder = AcoraBuilder()
-    for i in range(0,len(half2_v_seqs)):
-        v_half2_builder.add(str(half2_v_seqs[i]))
+    
+    v_half2_builder = AcoraBuilder(half2_v_seqs)
     half2_v_key = v_half2_builder.build()
-
-    j_half1_builder = AcoraBuilder()
-    for i in range(0,len(half1_j_seqs)):
-        j_half1_builder.add(str(half1_j_seqs[i]))
+    
+    j_half1_builder = AcoraBuilder(half1_j_seqs)
     half1_j_key = j_half1_builder.build()
-
-    j_half2_builder = AcoraBuilder()
-    for i in range(0,len(half2_j_seqs)):
-        j_half2_builder.add(str(half2_j_seqs[i]))
+    
+    j_half2_builder = AcoraBuilder(half2_j_seqs)
     half2_j_key = j_half2_builder.build()
-
-    # correctly assign a seq read with all desired variables
+    
+    # correctly assigned sequences
     assigned_count = 0
-    # this will simply track the number of sequences analysed in file
+    # number of sequences analysed
     seq_count = 0
-    t0 = time() # Begin timer
-
-
+    # begin clock
+    t0 = time()
+    
+    # XXX
     stemplate = Template('$v $j $del_v $del_j $nt_insert')
 
     for fastq in fastqs:
-        #XXX
-        print 'Importing sequences from', fastq, 'and assigning V and J regions...'
-        
+        if verbose:
+            sys.stderr.write(">> Starting %s...\n" % fastq)
         for record in SeqIO.parse(nopen(fastq), "fastq"):
-            
             found_seq_match = 0
             seq_count += 1
-            
             hold_v = v_key.findall(str(record.seq))
             hold_j = j_key.findall(str(record.seq))
 
@@ -187,12 +175,11 @@ def analysis(fastqs, v_fasta, j_fasta,
                     print f_seq
                     assigned_count += 1
                     found_seq_match = 1
-
-            if found_seq_match == 0 and with_reverse_complement_search:
-                
-                #####################
-                # REVERSE COMPLEMENT
-                #####################
+            
+            #####################
+            # REVERSE COMPLEMENT
+            #####################
+            if found_seq_match == 0 and rev_comp:
 
                 record_reverse = record.reverse_complement()
                 hold_v = v_key.findall(str(record_reverse.seq))
@@ -336,59 +323,33 @@ def get_j_deletions( rc, j_match, temp_start_j, j_regions_cut ):
     else:
         return []
 
-def get_v_tags(file_v, half_split):
-    import string
-    
-    v_seqs = []
-    jump_to_end_v = []
-    for line in file_v:
-        elements = line.rstrip("\n")
-        v_seqs.append(string.split(elements)[0])
-        jump_to_end_v.append(int(string.split(elements)[1]))
-
-    half1_v_seqs = []
-    half2_v_seqs = []
-
-    for i in range(len(v_seqs)):
-        half1_v_seqs.append(v_seqs[i][0:half_split])
-        half2_v_seqs.append(v_seqs[i][half_split:])
-    
-    return [v_seqs, half1_v_seqs, half2_v_seqs, jump_to_end_v]
-
-def get_j_tags(file_j, half_split):
-    import string
-    
-    j_seqs = []
-    jump_to_start_j = []
-
-    for line in file_j:
-        elements = line.rstrip("\n")
-        j_seqs.append(string.split(elements)[0])
-        jump_to_start_j.append(int(string.split(elements)[1]))
-
-    half1_j_seqs = []
-    half2_j_seqs = []
-
-    for j in range(len(j_seqs)):
-        half1_j_seqs.append(j_seqs[j][0:half_split])
-        half2_j_seqs.append(j_seqs[j][half_split:])
-
-    return [j_seqs, half1_j_seqs, half2_j_seqs, jump_to_start_j]
+def get_tags(tags):
+    # tag file format is seq, length of something, name
+    seqs = []
+    ends = []
+    # the halves of the sequence
+    left = []
+    right = []
+    for l in reader(tags, header="seq end name".split(), sep=" "):
+        seqs.append(l['seq'])
+        ends.append(int(l['end']))
+        left.append(l['seq'][:len(l['seq']) / 2])
+        right.append(l['seq'][len(l['seq']) / 2:])
+    return [seqs, left, right, ends]
 
 def main(args):
-    analysis(args.fastqs, args.vfasta, args.jfasta, args.rev_comp, args.verbose)
+    analysis(args.fastqs, args.vfasta, args.jfasta, args.vtags, args.jtags, args.rev_comp, args.verbose)
 
 if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser(description=__doc__,
             formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("vfasta", help="V region fasta")
+    p.add_argument("jfasta", help="J region fasta")
+    p.add_argument("vtags", help="V tags")
+    p.add_argument("jtags", help="J tags")
     p.add_argument("fastqs", metavar="FASTQ", nargs="+",
             help="single-end fastqs(s)")
-    req = p.add_argument_group("required arguments")
-    req.add_argument("-vf", "--v-fasta", dest="vfasta", required=True,
-            help="v region fasta")
-    req.add_argument("-jf", "--j-fasta", dest="jfasta", required=True,
-            help="j region fasta")
     p.add_argument("--reverse-complement-search", dest="rev_comp",
             action="store_true", help="if not aligned, attempt to align the \
                                        reverse complement")
